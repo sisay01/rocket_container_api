@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:request-config name="HTTP_Request_configuration_ads" doc:name="HTTP Request configuration" doc:id="1ac590c0-195b-46a2-b9cf-a3019e8f51d4" >
+		<http:request-connection host="ads.rocket-stream.bottlerocketservices.com" />
+	</http:request-config>
+	<flow name="retrieve_ads_videos_flow" doc:id="e2843d3d-071b-4093-98e5-3e053388396d" >
+		<http:request method="GET" doc:name="Request" doc:id="1027d51e-7bff-42f6-8d0b-91be2d3cb0c2" config-ref="HTTP_Request_configuration_ads" path="/advertisements"/>
+		<ee:transform doc:name="Transform Message" doc:id="5b80292f-773f-461e-bce0-199503aaf99d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="413b6b0e-ae4f-4247-93d4-39aaf46d4f3e" message="logging"/>
+	</flow>
+</mule>

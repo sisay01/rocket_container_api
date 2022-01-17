@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <http:listener-config name="rocket_container_api-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="rocket_container_api-config" api="resource::672d9d76-a115-4429-82a0-ec412a73bdba:rocket_container_api:1.0.0:raml:zip:rocket_container_api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="rocket_container_api-main" doc:id="cb4ee758-7cca-48ae-9d6d-fb4550c21d09">
+        <http:listener config-ref="rocket_container_api-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="rocket_container_api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="rocket_container_api-console">
+        <http:listener config-ref="rocket_container_api-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="rocket_container_api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\containers\(containerId):rocket_container_api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="containerId">attributes.uriParams.'containerId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  ads: [
+    {
+      id: 1,
+      name: "Test Advertisement",
+      url: "https://test.com/path/to/ad.m3u8"
+    }
+  ],
+  id: 1,
+  images: [
+    {
+      id: 1,
+      name: "Test Image",
+      url: "https://test.com/path/to/image.png"
+    }
+  ],
+  title: "container-1_ads_images_videos",
+  videos: [
+    {
+      assets: [
+        {
+          assetId: 1,
+          assetType: "IMAGE"
+        }
+      ],
+      description: "This is a simple test video",
+      expirationDate: "2018",
+      id: 1,
+      playbackUrl: "https://test.com/path/to/test.m3u8",
+      title: "Test Video",
+      "type": "MOVIE"
+    }
+  ]
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\containers:rocket_container_api-config">
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+[
+  {
+    ads: [
+      {
+        id: 1,
+        name: "Test Advertisement",
+        url: "https://test.com/path/to/ad.m3u8"
+      }
+    ],
+    id: 1,
+    images: [
+      {
+        id: 1,
+        name: "Test Image",
+        url: "https://test.com/path/to/image.png"
+      }
+    ],
+    title: "container-1_ads_images_videos",
+    videos: [
+      {
+        assets: [
+          {
+            assetId: 1,
+            assetType: "IMAGE"
+          }
+        ],
+        description: "This is a simple test video",
+        expirationDate: "2018",
+        id: 1,
+        playbackUrl: "https://test.com/path/to/test.m3u8",
+        title: "Test Video",
+        "type": "MOVIE"
+      }
+    ]
+  }
+]]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+    <flow name="get:\containers\(containerId)\ads:rocket_container_api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="containerId">attributes.uriParams.'containerId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+<!--         <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+{
+  name: "API Name",
+  code: "400",
+  title: "Bad Request",
+  correlationId: "700c96f9-5ee2-4318-aa48-5623db7ed516",
+  description: "some value",
+  invocationTimeStamp: "2022-11-01T17:41:32Z"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform> -->
+		<flow-ref doc:name="retrieve_ads_videos_flow" doc:id="7d7f0404-d766-4b1c-bf07-314fd7da31cb" name="retrieve_ads_videos_flow"/>
+    </flow>
+    <flow name="get:\containers\(containerId)\images:rocket_container_api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="containerId">attributes.uriParams.'containerId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<flow-ref doc:name="retrieve_images_videos_flow" doc:id="b0592958-23c2-4678-a3d3-4af55bf7cae1" name="retrieve_images_videos_flow"/>
+    </flow>
+    <flow name="get:\containers\(containerId)\videos:rocket_container_api-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="containerId">attributes.uriParams.'containerId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<flow-ref doc:name="retrieve_videos_flow" doc:id="5adffd4b-4a20-4099-8090-f0f8598e4a4b" name="retrieve_videos_flow"/>
+    </flow>
+</mule>
