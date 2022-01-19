@@ -1,8 +1,160 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns="http://www.mulesoft.org/schema/mule/core"
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
 	<api-gateway:autodiscovery apiId="17570957" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="54eeb79a-c72e-4c74-9b99-691664fcc732" flowRef="rocket_container_api-main" />
+<configuration doc:name="Configuration" doc:id="b821a657-7ba4-41ea-84e3-f597762a36bc" defaultErrorHandler-ref="ErrorHandler" />
+	<configuration-properties doc:name="Configuration properties" doc:id="ce6a3e73-0e6e-4aae-ab40-50367fa69f0d" file="common.yaml" />
+	<error-handler name="ErrorHandler">
+		<on-error-propagate type="APIKIT:BAD_REQUEST">
+			<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+				xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="b16aa838-dc78-4f33-a25b-0b9a30cfd091">
+				<ee:message>
+					<ee:set-payload><![CDATA[output application/json
+---
+{
+    success: false,
+    apiName: p('app.name'),
+    version: p('app.version'),
+    correlationId: correlationId,
+    message: "Bad Request",
+    timestamp: now(),
+    errorDetails: {
+      code: 400,
+      errorMessage: error.description
+    }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate type="APIKIT:NOT_FOUND">
+			<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+				xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="22c2c615-be61-410d-b94f-3896c95eff5d">
+				<ee:message>
+					<ee:set-payload><![CDATA[output application/json
+---
+{
+    success: false,
+    apiName: p('app.name'),
+    version: p('app.version'),
+    correlationId: correlationId,
+    message: "Not Found",
+    timestamp: now(),
+    errorDetails: {
+      code: 404,
+      errorMessage: error.description
+    }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+			<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+				xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="4e74bcbb-a6ad-4d63-9e38-e35437f25bbf">
+				<ee:message>
+					<ee:set-payload><![CDATA[output application/json
+---
+{
+    success: false,
+    apiName: p('app.name'),
+    version: p('app.version'),
+    correlationId: correlationId,
+    message: "Method Not Allowed",
+    timestamp: now(),
+    errorDetails: {
+      code: 405,
+      errorMessage: error.description
+    }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[405]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+			<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+				xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="4a2bbddb-7e3e-494b-890c-47a9b71ef3ba">
+				<ee:message>
+					<ee:set-payload><![CDATA[output application/json
+---
+{
+    success: false,
+    apiName: p('app.name'),
+    version: p('app.version'),
+    correlationId: correlationId,
+    message: "Not Acceptable",
+    timestamp: now(),
+    errorDetails: {
+      code: 406,
+      errorMessage: error.description
+    }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[406]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+			<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+				xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="3e62d816-eca6-4a68-9e07-439ae9c7324b">
+				<ee:message>
+					<ee:set-payload><![CDATA[output application/json
+---
+{
+    success: false,
+    apiName: p('app.name'),
+    version: p('app.version'),
+    correlationId: correlationId,
+    message: "Unsupported Media Type",
+    timestamp: now(),
+    errorDetails: {
+      code: 415,
+      errorMessage: error.description
+    }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[415]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+			<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+				xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="528f6daa-e6a3-4669-9951-d503b3e19d4c">
+				<ee:message>
+					<ee:set-payload><![CDATA[output application/json
+---
+{
+    success: false,
+    apiName: p('app.name'),
+    version: p('app.version'),
+    correlationId: correlationId,
+    message: "Not Implemented",
+    timestamp: now(),
+    errorDetails: {
+      code: 501,
+      errorMessage: error.description
+    }
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable variableName="httpStatus"><![CDATA[501]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+		</on-error-propagate>
+	</error-handler>
+
+
 </mule>
